@@ -72,17 +72,41 @@ row locks exist and only wait for that one variable.
 
 ---
 
-## Two things that behave differently on a free Vercel account
+## Vercel Hobby is free — but not for a clinic
 
-**Live calendar updates.** The site keeps a long-lived connection open so a slot taken
-in one browser disappears in another. Vercel Hobby cuts any function off after ~10
-seconds, so that connection reconnects repeatedly instead of staying open. Booking
-still works correctly either way, and the calendar re-reads on every reconnect — it
-just is not as instant as it is locally. A Pro account (or moving the stream to
-Supabase Realtime) fixes it.
+Vercel’s free Hobby plan is **non-commercial personal use only**. Their fair use
+guidelines define commercial usage as any deployment used for the financial gain of
+anyone involved in producing it, and list *“advertising the sale of a product or
+service”* and *“receiving payment to create, update, or host the site”* as examples.
 
-**Reminders.** Hobby allows one scheduled run per day, so reminder emails go out in a
-single daily batch rather than close to the appointment. See the last section.
+A clinic site that advertises consultations and takes appointments is commercial.
+**The live site needs a Pro plan — $20 per developer per month.** Vercel does enforce
+this and can pause deployments.
+
+Hobby is fine while this is a private preview with no patients on it. It is not a
+long-term answer.
+
+### Capacity is not the problem
+
+Hobby includes 1,000,000 function invocations, 100 GB data transfer and 4 CPU-hours a
+month. A single-doctor clinic will not come close to any of those. The only reason to
+pay is the commercial-use clause — and the cron limit below.
+
+### What Hobby actually restricts for this app
+
+| | Hobby | Pro |
+| --- | --- | --- |
+| Cron frequency | **once per day**, fired anywhere in a ±59 min window | once per minute, precise |
+| Function max duration | 300s (5 min) | 300s, configurable higher |
+
+The cron limit is why `vercel.json` schedules the notification job daily. A faster
+expression **fails at deploy time** on Hobby with “Hobby accounts are limited to daily
+cron jobs”. On Pro, change it to `*/15 * * * *` so reminders and feedback requests land
+near their intended time.
+
+The 5-minute function ceiling means the live-calendar connection reconnects every few
+minutes rather than staying open indefinitely. Booking is correct either way and the
+calendar re-reads on each reconnect.
 
 ---
 
@@ -141,11 +165,3 @@ site. From a phone, when GitHub asks where to commit, choose **"Create a new bra
 and start a pull request"** — Vercel comments on the pull request with a preview link.
 Merge it when you are happy.
 
----
-
-## Automatic reminders
-
-`vercel.json` schedules `/api/cron/notifications` once a day at 08:30 IST, which is
-the fastest a Vercel Hobby account allows. On a Pro account, change the schedule to
-`*/15 * * * *` for quarter-hourly checks, which makes reminders and feedback requests
-land much closer to their intended time.
