@@ -141,9 +141,10 @@
     letter-spacing: -0.01em;
   }
 
+  /* Sized so the hero and its credential row fit one viewport without clipping. */
   .display {
-    font-size: clamp(2.45rem, 6.4vw, 5.2rem);
-    line-height: 0.98;
+    font-size: clamp(2.1rem, 4.7vw, 3.9rem);
+    line-height: 1.02;
   }
 
   .h2 {
@@ -222,11 +223,110 @@
   .field::placeholder { color: transparent; }
   .field:focus { border-color: var(--color-copper); }
 
+  /* Infinite ribbon. The track holds the content twice, so translating it exactly
+     half its width loops seamlessly. */
+  .ribbon {
+    display: flex;
+    width: max-content;
+    animation: ribbon-slide var(--ribbon-duration, 38s) linear infinite;
+  }
+  .ribbon-reverse { animation-direction: reverse; }
+  .ribbon-host:hover .ribbon { animation-play-state: paused; }
+
+  @keyframes ribbon-slide {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* Fades the ribbon out at both edges instead of cutting it off. */
+  .ribbon-mask {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  }
+
   /* The soft arch used for the portrait — a beauty-brand shape, not a box. */
   .arch {
     border-radius: 220px 220px 26px 26px;
     overflow: hidden;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Scroll reveals. The class is toggled by src/components/motion.tsx; keeping the
+   animation in CSS means removing `.in` resets it, so it replays on every return.
+--------------------------------------------------------------------------- */
+/* Visible by default. Only once the observer has actually reported does the
+   element hide and wait its turn — so a page where the observer never fires
+   still shows all its content. */
+.rv {
+  opacity: 1;
+}
+.rv.rv-armed {
+  opacity: 0;
+}
+.rv.rv-armed.in {
+  opacity: 1;
+  animation-duration: var(--rv-duration, 0.95s);
+  animation-delay: var(--rv-delay, 0s);
+  animation-timing-function: var(--ease-out-soft);
+  animation-fill-mode: backwards;
+}
+
+.rv.rv-armed[data-rv="up"].in { animation-name: rv-up; }
+.rv.rv-armed[data-rv="down"].in { animation-name: rv-down; }
+.rv.rv-armed[data-rv="left"].in { animation-name: rv-left; }
+.rv.rv-armed[data-rv="right"].in { animation-name: rv-right; }
+.rv.rv-armed[data-rv="corner"].in { animation-name: rv-corner; }
+.rv.rv-armed[data-rv="cornerLeft"].in { animation-name: rv-corner-left; }
+.rv.rv-armed[data-rv="tilt"].in { animation-name: rv-tilt; transform-origin: top center; }
+.rv.rv-armed[data-rv="blur"].in { animation-name: rv-blur; }
+.rv.rv-armed[data-rv="clip"].in { animation-name: rv-clip; }
+.rv.rv-armed[data-rv="scale"].in { animation-name: rv-scale; }
+.rv.rv-armed[data-rv="fade"].in { animation-name: rv-fade; }
+
+@keyframes rv-fade { from { opacity: 0; } }
+@keyframes rv-up { from { opacity: 0; transform: translateY(84px); } }
+@keyframes rv-down { from { opacity: 0; transform: translateY(-64px); } }
+@keyframes rv-left { from { opacity: 0; transform: translateX(-130px); } }
+@keyframes rv-right { from { opacity: 0; transform: translateX(130px); } }
+@keyframes rv-corner { from { opacity: 0; transform: translate(210px, 110px) rotate(7deg) scale(0.9); } }
+@keyframes rv-corner-left { from { opacity: 0; transform: translate(-210px, 110px) rotate(-7deg) scale(0.9); } }
+@keyframes rv-tilt { from { opacity: 0; transform: perspective(900px) rotateX(26deg) translateY(90px) scale(0.95); } }
+@keyframes rv-blur { from { opacity: 0; transform: translateY(64px); filter: blur(14px); } }
+@keyframes rv-scale { from { opacity: 0; transform: scale(0.72) translateY(54px); } }
+@keyframes rv-clip {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+    clip-path: inset(0% 0% 100% 0%);
+  }
+}
+
+/* Big translations must never widen the page. */
+@media (max-width: 700px) {
+  @keyframes rv-left { from { opacity: 0; transform: translateX(-80px); } }
+  @keyframes rv-right { from { opacity: 0; transform: translateX(80px); } }
+  @keyframes rv-corner { from { opacity: 0; transform: translate(120px, 80px) rotate(6deg) scale(0.92); } }
+  @keyframes rv-corner-left { from { opacity: 0; transform: translate(-120px, 80px) rotate(-6deg) scale(0.92); } }
+}
+
+/* Word-by-word headline rise. */
+.split .w {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.08em;
+}
+.split .w > span {
+  display: inline-block;
+  transition: transform 0.85s var(--ease-out-soft);
+  transition-delay: calc(var(--i, 0) * 62ms + var(--split-delay, 0s));
+}
+.split.split-armed .w > span {
+  transform: translateY(112%);
+}
+.split.split-armed.in .w > span {
+  transform: none;
 }
 
 @layer utilities {
@@ -246,6 +346,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  /* Reveals become plain visible content rather than snapping about. */
+  .rv { opacity: 1 !important; animation: none !important; }
+  .split .w > span { transform: none !important; transition: none !important; }
+  .ribbon { animation: none !important; }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;

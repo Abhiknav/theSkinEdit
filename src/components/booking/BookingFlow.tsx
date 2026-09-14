@@ -88,8 +88,10 @@ export function BookingFlow() {
   if (confirmed) return <Confirmation appointment={confirmed} />;
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[1.4fr_0.6fr] lg:items-start lg:gap-14">
-      <div className="space-y-12">
+    /* min-w-0 on both columns: without it the scrolling day rail forces the grid
+       track wider than the page and pushes the summary off the right edge. */
+    <div className="grid gap-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.6fr)] lg:items-start lg:gap-14">
+      <div className="min-w-0 space-y-12">
         <section>
           <StepHead n="01" title="Choose your consultation" />
           <div className="mt-5">
@@ -261,7 +263,7 @@ function Summary({
   cutoffHours: number;
 }) {
   return (
-    <aside className="lg:sticky lg:top-28">
+    <aside className="min-w-0 lg:sticky lg:top-28">
       <div className="card overflow-hidden">
         <div className="border-b border-line px-7 py-5">
           <span className="label">Your appointment</span>

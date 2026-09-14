@@ -96,12 +96,15 @@ export function Hero() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 1.15, ease: EASE }}
-              className="mt-10 grid max-w-xl sm:mt-12 grid-cols-2 gap-x-6 gap-y-7 border-t border-border pt-8 sm:grid-cols-4"
+              className="mt-8 grid max-w-xl grid-cols-2 gap-x-5 gap-y-5 border-t border-border pt-6 sm:grid-cols-4"
             >
               {HERO_FACTS.map((fact) => (
                 <div key={fact.label}>
-                  <dt className="font-display text-[1.45rem] leading-none text-ink">{fact.value}</dt>
-                  <dd className="mt-2 font-mono text-[0.62rem] tracking-[0.14em] text-faint uppercase">
+                  {/* Values like MRCP-SCE are long — keep them small enough not to clip. */}
+                  <dt className="font-display text-[clamp(0.95rem,1.5vw,1.2rem)] leading-tight break-words text-ink">
+                    {fact.value}
+                  </dt>
+                  <dd className="mt-1.5 font-mono text-[0.58rem] leading-snug tracking-[0.1em] text-faint uppercase">
                     {fact.label}
                   </dd>
                 </div>

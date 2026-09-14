@@ -47,15 +47,21 @@ export function About() {
               </div>
             </Reveal>
 
+            {/* Her posts and awards live in the Papers section — this just points there. */}
             <Reveal kind="up" delay={0.12}>
-              <ul className="card divide-y divide-line p-2">
-                {ABOUT.positions.map((position) => (
-                  <li key={position} className="flex gap-3.5 px-5 py-4">
-                    <span aria-hidden className="mt-[0.6rem] h-1 w-1 shrink-0 rounded-full bg-copper" />
-                    <span className="text-[0.93rem] leading-relaxed text-soft">{position}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="card p-8">
+                <span className="label">Also</span>
+                <p className="mt-5 leading-relaxed text-soft">
+                  Board member of the IADVL Special Interest Group in Aesthetics, and a reviewer for
+                  the Journal of the American Academy of Dermatology.
+                </p>
+                <a href="#papers" className="btn btn-ghost mt-6">
+                  Papers &amp; recognition
+                  <span className="arw" aria-hidden>
+                    →
+                  </span>
+                </a>
+              </div>
             </Reveal>
           </div>
         </div>

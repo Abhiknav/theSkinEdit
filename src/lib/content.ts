@@ -212,11 +212,94 @@ export const FAQS = [
 export const NAV = [
   { href: "#about", label: "About" },
   { href: "#treatments", label: "Treatments" },
-  { href: "#approach", label: "Approach" },
+  { href: "#journey", label: "Journey" },
+  { href: "#papers", label: "Papers" },
   { href: "#book", label: "Book" },
   { href: "#voices", label: "Voices" },
   { href: "#contact", label: "Contact" },
 ];
+
+/** The ribbon that runs under the hero — what she actually treats, on a loop. */
+export const RIBBON = [
+  "Acne & scarring",
+  "Melasma",
+  "Hair loss",
+  "Trichoscopy",
+  "PRP therapy",
+  "Hair transplantation",
+  "Botox",
+  "Dermal fillers",
+  "Q-switched laser",
+  "Chemical peels",
+  "Mole & lesion surgery",
+  "Keloids",
+  "Vitiligo surgery",
+  "Anti-ageing",
+];
+
+/**
+ * Career and training.
+ *
+ * [VERIFY] Taken from the profile supplied in the project brief. LinkedIn blocks
+ * automated reading, so none of this has been cross-checked against her profile —
+ * please have Dr Bansal confirm the roles and dates before this goes to patients.
+ */
+export const EXPERIENCE = [
+  {
+    period: "Present",
+    role: "Sr. Consultant Dermatologist",
+    place: "Manipal Hospital, Sarjapur Road & Whitefield",
+  },
+  { period: "Earlier", role: "Consultant Dermatologist", place: "Sakra World Hospital, Bengaluru" },
+  { period: "Earlier", role: "Consultant Dermatologist", place: "Olivia Skin & Hair Clinics" },
+  { period: "Earlier", role: "Consultant Dermatologist", place: "Apollo Hospitals, Bengaluru" },
+  {
+    period: "Residency",
+    role: "Dermatology residency",
+    place: "Victoria Hospital and Bowring & Lady Curzon Hospital, Bengaluru",
+  },
+  { period: "Residency", role: "Dermatology residency", place: "Sir Gangaram Hospital, New Delhi" },
+];
+
+export const EDUCATION = [
+  {
+    year: "2021",
+    title: "Triple postgraduate distinction",
+    detail: "FRGUHS (Dermatosurgery) · MRCP-SCE, Royal College of Physicians UK · Diplomate, European Board of Dermatovenereology",
+  },
+  { year: "2021", title: "DNB, Dermatology", detail: "National Board of Examinations" },
+  {
+    year: "2017",
+    title: "MD, Dermatology",
+    detail: "Bangalore Medical College & Research Institute — College Gold Medallist",
+  },
+  { year: "2012", title: "MBBS", detail: "Kasturba Medical College, Mangalore" },
+];
+
+export const PAPERS = {
+  label: "Writing",
+  title: "Papers and",
+  accent: "chapters.",
+  publications: [
+    {
+      title: "Peer-reviewed papers",
+      detail: "Journal of the American Academy of Dermatology — she also reviews for the journal",
+    },
+    {
+      title: "Clinical Correlation and Diagnostic Implications",
+      detail: "Book chapters",
+    },
+    { title: "IADVL Color Atlas of Dermatology", detail: "Contributor" },
+    { title: "IADVL Textbook of Dermatology, 4th edition", detail: "Contributor" },
+  ],
+  recognition: [
+    { year: "2017", text: "Prof. C S Bhavani Kumar Memorial Award, DERMACON" },
+    { year: "2014", text: "Research grant, Bangalore Dermatological Society" },
+    { year: "—", text: "College Gold Medallist, Bangalore Medical College" },
+    { year: "—", text: "Board member, IADVL Special Interest Group in Aesthetics" },
+    { year: "—", text: "Editorial board, IADVL newsletter RESIDREAM" },
+  ],
+};
 
 /**
  * [PLACEHOLDER] Shown only until the first real patient note is approved in the
@@ -241,7 +324,7 @@ export const SAMPLE_TESTIMONIALS = [
     id: "sample-3",
     name: "Sample",
     rating: 5,
-    comment: "Placeholder for an approved patient note. Feedback is requested after every appointment.",
+    comment: "Placeholder for an approved patient note. Real notes replace these once published.",
     publishedAt: null,
   },
 ];

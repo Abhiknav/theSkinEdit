@@ -93,7 +93,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Reveal animations begin at opacity 0, written inline during SSR.
             Without JS nothing would undo them, so the copy is restored here. */}
         <noscript>
-          <style>{`[style*="opacity"],[style*="transform"]{opacity:1!important;transform:none!important;filter:none!important;clip-path:none!important}`}</style>
+          <style>{`.rv{opacity:1!important;animation:none!important}.split .w>span{transform:none!important}[style*="opacity"],[style*="transform"]{opacity:1!important;transform:none!important;filter:none!important;clip-path:none!important}`}</style>
         </noscript>
         <a
           href="#main"
