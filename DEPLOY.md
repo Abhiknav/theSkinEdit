@@ -72,6 +72,20 @@ row locks exist and only wait for that one variable.
 
 ---
 
+## Two things that behave differently on a free Vercel account
+
+**Live calendar updates.** The site keeps a long-lived connection open so a slot taken
+in one browser disappears in another. Vercel Hobby cuts any function off after ~10
+seconds, so that connection reconnects repeatedly instead of staying open. Booking
+still works correctly either way, and the calendar re-reads on every reconnect — it
+just is not as instant as it is locally. A Pro account (or moving the stream to
+Supabase Realtime) fixes it.
+
+**Reminders.** Hobby allows one scheduled run per day, so reminder emails go out in a
+single daily batch rather than close to the appointment. See the last section.
+
+---
+
 ## Editing from your phone
 
 Once Vercel is connected, **every push to `main` deploys automatically.** No commands,
