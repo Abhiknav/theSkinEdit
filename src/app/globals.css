@@ -1,26 +1,254 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---------------------------------------------------------------------------
+   The Skin Edit — design tokens
+   Warm paper, deep ink, copper accent (from the letterhead). One theme, no
+   dark mode: a clinic should look like the same place every time you open it.
+--------------------------------------------------------------------------- */
+
+@theme {
+  --color-paper: #fdfaf6;
+  --color-tint: #f8f1e8;
+  --color-cream: #f3e9dd;
+  --color-card: #ffffff;
+
+  --color-ink: #121820;
+  --color-soft: #55606e;
+  --color-faint: #8d949f;
+
+  --color-deep: #0e1822;
+  --color-deep-2: #16232f;
+
+  --color-copper: #b4693f;
+  --color-copper-bright: #cf824f;
+  --color-copper-soft: #e7c3a9;
+  --color-copper-wash: #f8ece2;
+
+  --color-border: #e8ddd0;
+  --color-line: #f1e8dd;
+
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-dm-mono), ui-monospace, "SF Mono", monospace;
+
+  --shadow-sm: 0 1px 2px rgba(18, 24, 32, 0.05), 0 10px 24px -14px rgba(18, 24, 32, 0.2);
+  --shadow-lg: 0 4px 14px rgba(18, 24, 32, 0.07), 0 34px 64px -28px rgba(18, 24, 32, 0.32);
+
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Sticky header clearance for anchor jumps. */
+    scroll-padding-top: 84px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.022em;
+    line-height: 1.04;
+    text-wrap: balance;
+    color: var(--color-ink);
+  }
+
+  ::selection {
+    background: var(--color-copper);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-copper-bright);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  input, textarea, select, button {
+    font: inherit;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* Page gutter — one rule, every section. Generous on desktop, honest on phones. */
+  .wrap {
+    max-width: 1180px;
+    margin-inline: auto;
+    padding-inline: clamp(22px, 5vw, 60px);
+  }
+
+  .band {
+    padding-block: clamp(72px, 9vw, 132px);
+    position: relative;
+  }
+
+  .band-tint { background: var(--color-tint); }
+  .band-cream { background: var(--color-cream); }
+
+  /* Dark sections re-point the tokens so children need no special casing. */
+  .band-deep {
+    background: var(--color-deep);
+    --color-ink: #f4f1ec;
+    --color-soft: #aeb8c4;
+    --color-faint: #7f8894;
+    --color-card: #17232f;
+    --color-border: #26343f;
+    --color-line: #1e2b36;
+    --color-copper: #dd9a6d;
+    --color-copper-bright: #eaa87a;
+    --color-copper-wash: #1f2c38;
+    color: #f4f1ec;
+  }
+  .band-deep h1, .band-deep h2, .band-deep h3, .band-deep h4 { color: #f7f4ef; }
+
+  /* Mono eyebrow with a leading hairline. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-copper);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .label::before {
+    content: "";
+    width: 26px;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.65;
+    flex: none;
+  }
+
+  .accent {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    color: var(--color-copper);
+    letter-spacing: -0.01em;
+  }
+
+  .display {
+    font-size: clamp(2.45rem, 6.4vw, 5.2rem);
+    line-height: 0.98;
+  }
+
+  .h2 {
+    font-size: clamp(1.95rem, 4vw, 3.15rem);
+  }
+
+  .lede {
+    color: var(--color-soft);
+    font-size: clamp(1.02rem, 1.3vw, 1.14rem);
+    line-height: 1.7;
+    max-width: 52ch;
+  }
+
+  /* Pill buttons — lift and the arrow steps forward. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 100px;
+    padding: 15px 28px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition:
+      transform 0.25s var(--ease-out-soft),
+      box-shadow 0.25s var(--ease-out-soft),
+      background 0.25s,
+      border-color 0.25s,
+      color 0.25s;
+  }
+  .btn .arw { transition: transform 0.28s var(--ease-out-soft); }
+  .btn:hover .arw { transform: translateX(4px); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+
+  .btn-primary { background: var(--color-deep); color: #fff; }
+  .btn-primary:hover:not(:disabled) { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+  .btn-copper { background: var(--color-copper); color: #fff; }
+  .btn-copper:hover:not(:disabled) { transform: translateY(-3px); box-shadow: var(--shadow-lg); background: var(--color-copper-bright); }
+
+  .btn-ghost { background: transparent; color: var(--color-ink); border-color: var(--color-border); }
+  .btn-ghost:hover:not(:disabled) { transform: translateY(-3px); border-color: var(--color-ink); }
+
+  .card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 100px;
+    padding: 7px 15px;
+    font-size: 0.76rem;
+    color: var(--color-soft);
+    background: color-mix(in srgb, var(--color-card) 70%, transparent);
+  }
+
+  .field {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1.5px solid var(--color-border);
+    padding: 22px 2px 10px;
+    color: var(--color-ink);
+    outline: none;
+    transition: border-color 0.3s var(--ease-out-soft);
+  }
+  .field::placeholder { color: transparent; }
+  .field:focus { border-color: var(--color-copper); }
+
+  /* The soft arch used for the portrait — a beauty-brand shape, not a box. */
+  .arch {
+    border-radius: 220px 220px 26px 26px;
+    overflow: hidden;
+  }
+}
+
+@layer utilities {
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.04;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
