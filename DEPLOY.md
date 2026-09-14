@@ -31,7 +31,11 @@ In Vercel: **Project → Settings → Environment Variables**. Tick *Production*
 | `AUTH_SECRET` | Any long random string. Generate one at https://generate-secret.vercel.app/32 |
 | `DOCTOR_EMAIL` | The email Dr Bansal signs in with |
 | `DOCTOR_PASSWORD` | A real password — **not** the `skinedit` dev default |
-| `NEXT_PUBLIC_SITE_URL` | Your live URL, e.g. `https://the-skin-edit.vercel.app` (no trailing slash) |
+
+That is all three. **You do not need to set a site URL** — the app reads Vercel's own
+`VERCEL_PROJECT_PRODUCTION_URL`, which is always present and switches to your custom
+domain by itself the day you add one. Set `NEXT_PUBLIC_SITE_URL` only if you want to
+force a specific address; it overrides everything else.
 
 **Optional, add when ready:**
 
@@ -45,7 +49,8 @@ In Vercel: **Project → Settings → Environment Variables**. Tick *Production*
 ### 3. Custom domain (whenever you have one)
 
 **Project → Settings → Domains → Add** `theskinedit.in`, then point the DNS records
-Vercel shows you at your registrar. Update `NEXT_PUBLIC_SITE_URL` to match afterwards.
+Vercel shows you at your registrar. Nothing else to change — links in emails and the
+page metadata follow the new domain on the next deploy by themselves.
 
 ---
 

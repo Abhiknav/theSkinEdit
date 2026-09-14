@@ -1,3 +1,5 @@
+import { siteUrl } from "@/lib/site";
+
 import type { AppointmentDetail, Doctor, NotificationKind } from "../db/types";
 
 export function formatSlot(startAt: string, timeZone: string) {
@@ -24,7 +26,7 @@ export interface RenderedMessage {
   html: string;
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const SITE_URL = siteUrl();
 
 function shell(heading: string, body: string, footer: string) {
   return `<div style="margin:0;padding:32px;background:#fdfaf6;font-family:Helvetica,Arial,sans-serif;color:#121820">
