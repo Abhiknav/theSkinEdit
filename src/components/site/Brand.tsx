@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 /**
  * Wordmark. The letterhead's script "se" monogram, set in the display italic so
  * it sits in the same type system as the rest of the site.
- * [PLACEHOLDER] Swap for the vector original when brand files arrive.
+ * Swap for the vector original when the brand files arrive.
  */
 export function Brand({
   size = "md",

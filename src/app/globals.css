@@ -133,6 +133,18 @@
     flex: none;
   }
 
+  /* Long eyebrows (the hero's specialties line) wrap instead of overflowing.
+     The hairline drops to the first line's optical centre rather than the
+     centre of the whole wrapped block. */
+  .label-wrap {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    max-width: 100%;
+  }
+  .label-wrap::before {
+    margin-top: 0.62em;
+  }
+
   .accent {
     font-family: var(--font-display);
     font-style: italic;

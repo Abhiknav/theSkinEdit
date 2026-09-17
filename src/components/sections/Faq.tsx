@@ -23,32 +23,39 @@ export function Faq() {
               return (
                 <Reveal key={item.q} kind="up" index={i} duration={0.7}>
                   <div className="border-b border-border">
-                    <button
-                      type="button"
-                      onClick={() => setOpen(isOpen ? null : i)}
-                      aria-expanded={isOpen}
-                      className="group flex w-full items-start justify-between gap-8 py-6 text-left"
-                    >
-                      <span
-                        className={`font-display text-[1.22rem] leading-snug transition-colors duration-300 sm:text-[1.38rem] ${
-                          isOpen ? "text-copper" : "text-ink group-hover:text-copper"
-                        }`}
+                    <h3>
+                      <button
+                        type="button"
+                        onClick={() => setOpen(isOpen ? null : i)}
+                        aria-expanded={isOpen}
+                        aria-controls={`faq-answer-${i}`}
+                        id={`faq-question-${i}`}
+                        className="group flex w-full items-start justify-between gap-6 py-6 text-left sm:gap-8"
                       >
-                        {item.q}
-                      </span>
-                      <motion.span
-                        animate={{ rotate: isOpen ? 45 : 0 }}
-                        transition={{ duration: 0.4, ease: EASE }}
-                        aria-hidden
-                        className="mt-1 shrink-0 text-[1.4rem] leading-none font-light text-copper"
-                      >
-                        +
-                      </motion.span>
-                    </button>
+                        <span
+                          className={`min-w-0 font-display text-[1.22rem] leading-snug transition-colors duration-300 sm:text-[1.38rem] ${
+                            isOpen ? "text-copper" : "text-ink group-hover:text-copper"
+                          }`}
+                        >
+                          {item.q}
+                        </span>
+                        <motion.span
+                          animate={{ rotate: isOpen ? 45 : 0 }}
+                          transition={{ duration: 0.4, ease: EASE }}
+                          aria-hidden
+                          className="mt-1 shrink-0 text-[1.4rem] leading-none font-light text-copper"
+                        >
+                          +
+                        </motion.span>
+                      </button>
+                    </h3>
 
                     <AnimatePresence initial={false}>
                       {isOpen && (
                         <motion.div
+                          id={`faq-answer-${i}`}
+                          role="region"
+                          aria-labelledby={`faq-question-${i}`}
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}

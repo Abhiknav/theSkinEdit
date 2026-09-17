@@ -31,11 +31,13 @@ redirect to the matching anchor, so links already sent by email keep working.
 | Anchor | Section |
 | --- | --- |
 | `#top` | Hero — portrait, headline, four credentials |
-| `#about` | Who she is, credentials, European Board diploma, positions |
-| `#treatments` | Eight treatments as an interactive index (accordion on phones) |
-| `#approach` | Three rules, on a dark band |
+| `#about` | Who she is, credentials, European Board qualification, professional roles |
+| `#treatments` | The eight areas of care, as an interactive index |
+| `#approach` | The three principles behind every consultation, on a dark band |
+| `#journey` | Clinical experience and education, side by side |
+| `#papers` | Publications, conference presentations, recognition and roles |
 | `#book` | Live calendar and booking, with a Manage booking tab at `#manage` |
-| `#voices` | Published feedback plus the patient submission form |
+| `#voices` | Approved patient experiences plus the submission form |
 | `#faq` | Cancellation policy, online vs in person, first visit |
 | `#contact` | Hours, phone, WhatsApp, where she consults |
 
@@ -125,7 +127,7 @@ Nothing else changes — `getStore()` picks the driver and every caller is drive
 | **Doctor auth** | Signed cookie against env credentials | Swap `server/auth/doctor.ts` for Clerk or Supabase Auth — `requireDoctor()` keeps its signature |
 | **Realtime** | In-process pub/sub → SSE (correct for one instance) | Supabase Realtime on `slots`, or Redis pub/sub, behind the same route |
 | **Photography** | Only Dr Bansal&rsquo;s portrait is real; there is no clinic yet, so no interiors | Clinic photography once premises open |
-| **Testimonials** | Sample cards, visibly marked, shown only until real ones are approved | Nothing — they disappear on first publish |
+| **Testimonials** | None shown; the section explains that approved experiences will appear here | Nothing — the ribbon renders as soon as the first note is approved |
 | **Pricing** | Not shown anywhere yet | Confirm indicative ranges, or keep it offline |
 | **Map** | Removed — there is no clinic address to map yet | Add when premises open |
 | **Payments** | Not built, by design | Razorpay — the booking flow has a clean seam before confirmation |

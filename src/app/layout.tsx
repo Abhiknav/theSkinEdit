@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { DM_Mono, Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 
 import { CLINIC } from "@/lib/content";
+import { structuredData } from "@/lib/seo";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -27,29 +28,67 @@ const dmMono = DM_Mono({
 
 const SITE_URL = siteUrl();
 
+const TITLE =
+  "Dr Akshi Bansal | Dermatologist, Dermatosurgeon & Trichologist in Bengaluru | The Skin Edit";
+const DESCRIPTION =
+  "Dr Akshi Bansal is a senior dermatologist, dermatosurgeon and trichologist in Bengaluru, offering clinical dermatology, hair and scalp care, dermatosurgery and aesthetic dermatology.";
+const OG_IMAGE = `${SITE_URL}${CLINIC.doctor.photo}`;
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "The Skin Edit — Dr Akshi Bansal, Dermatologist in Bengaluru",
-  description:
-    "Dr Akshi Bansal — dermatologist, dermatosurgeon and trichologist in Bengaluru. Acne, pigmentation, hair loss, lasers and aesthetic medicine. See live availability and book in under a minute.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/" },
+  applicationName: CLINIC.brand,
+  authors: [{ name: CLINIC.doctor.name }],
+  creator: CLINIC.doctor.name,
+  publisher: CLINIC.brand,
+  category: "Dermatology",
   keywords: [
-    "dermatologist Bangalore",
-    "skin specialist Sarjapur",
+    "dermatologist in Bengaluru",
+    "dermatologist in Bangalore",
+    "senior dermatologist in Bengaluru",
+    "dermatosurgeon in Bengaluru",
+    "trichologist in Bengaluru",
+    "hair loss treatment",
+    "hair and scalp care",
+    "clinical dermatology",
+    "aesthetic dermatology",
+    "acne treatment",
+    "pigmentation treatment",
+    "melasma treatment",
+    "hair transplantation",
+    "laser dermatology",
+    "dermatosurgery",
     "Dr Akshi Bansal",
-    "acne treatment Bangalore",
-    "hair loss treatment Bengaluru",
-    "melasma pigmentation dermatologist",
   ],
   openGraph: {
-    title: "The Skin Edit — Dr Akshi Bansal",
-    description:
-      "Dermatology, trichology and aesthetic medicine in Bengaluru. Live appointment booking — reschedule or cancel yourself.",
+    title: TITLE,
+    description: DESCRIPTION,
     url: SITE_URL,
     siteName: CLINIC.brand,
     locale: "en_IN",
     type: "website",
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 646,
+        height: 703,
+        alt: CLINIC.doctor.photoAlt,
+      },
+    ],
   },
-  robots: { index: true, follow: true },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [OG_IMAGE],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
 };
 
 export const viewport: Viewport = {
@@ -58,37 +97,13 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-const structuredData = {
-  "@context": "https://schema.org",
-  "@type": "MedicalBusiness",
-  name: CLINIC.brand,
-  url: SITE_URL,
-  telephone: CLINIC.phone,
-  medicalSpecialty: "Dermatology",
-  areaServed: "Bengaluru",
-  employee: {
-    "@type": "Physician",
-    name: CLINIC.doctor.name,
-    medicalSpecialty: "Dermatology",
-  },
-  openingHoursSpecification: [
-    {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: ["Tuesday", "Thursday", "Saturday"],
-      opens: "13:30",
-      closes: "17:30",
-    },
-    { "@type": "OpeningHoursSpecification", dayOfWeek: ["Friday"], opens: "17:00", closes: "20:00" },
-  ],
-};
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-IN" className={`${fraunces.variable} ${jakarta.variable} ${dmMono.variable}`}>
       <body>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData(SITE_URL)) }}
         />
         {/* Reveal animations begin at opacity 0, written inline during SSR.
             Without JS nothing would undo them, so the copy is restored here. */}

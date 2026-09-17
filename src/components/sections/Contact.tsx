@@ -1,5 +1,5 @@
 import { Reveal, SectionHead } from "@/components/motion";
-import { CLINIC } from "@/lib/content";
+import { CLINIC, CONTACT } from "@/lib/content";
 
 export function Contact() {
   return (
@@ -8,10 +8,10 @@ export function Contact() {
         <div className="grid gap-14 lg:grid-cols-[1fr_1fr] lg:gap-20">
           <div>
             <SectionHead
-              label="Contact"
-              title="Come and see"
-              accent="Dr Bansal."
-              lede="Booking online is quicker than calling, but the phone is answered through consulting hours."
+              label={CONTACT.label}
+              title={CONTACT.title}
+              accent={CONTACT.accent}
+              lede={CONTACT.lede}
             />
 
             <Reveal kind="up" delay={0.15}>
@@ -57,7 +57,7 @@ export function Contact() {
                 </div>
                 <div className="flex items-baseline gap-4">
                   <dt className="w-24 shrink-0 font-mono text-[0.62rem] tracking-[0.14em] text-faint uppercase">
-                    City
+                    Location
                   </dt>
                   <dd className="text-soft">{CLINIC.city}</dd>
                 </div>
@@ -85,13 +85,7 @@ export function Contact() {
                 <span className="label">Where</span>
                 <p className="mt-5 leading-relaxed text-soft">
                   Dr Bansal currently consults at{" "}
-                  <span className="text-ink">{CLINIC.doctor.consultsAt}</span>. Your confirmation
-                  carries the address and directions for the location you book.
-                </p>
-                <p className="mt-4 text-[0.88rem] leading-relaxed text-faint">
-                  {/* [PLACEHOLDER] The Skin Edit does not have its own premises yet. */}
-                  A dedicated Skin Edit clinic is on the way — this page will carry its address the
-                  day it opens.
+                  <span className="text-ink">{CLINIC.doctor.consultsAt}</span>. {CONTACT.where}
                 </p>
               </div>
             </Reveal>

@@ -53,7 +53,8 @@ export function FeedbackForm() {
           <span className="font-display text-[3rem] leading-none text-copper italic">se</span>
           <h3 className="mt-4 font-display text-[1.8rem] text-ink">Thank you.</h3>
           <p className="mx-auto mt-3 max-w-sm text-[0.92rem] leading-relaxed text-soft">
-            Your note has gone to Dr Bansal. Nothing is published until she reads and approves it.
+            Your experience has gone to Dr Bansal. Nothing is published until she has reviewed and
+            approved it.
           </p>
         </motion.div>
       ) : (
@@ -65,7 +66,7 @@ export function FeedbackForm() {
           className="card space-y-6 p-7 sm:p-8"
         >
           <div>
-            <span className="label">Leave a note</span>
+            <span className="label">Share your experience</span>
             <div className="mt-4 flex gap-2.5" onMouseLeave={() => setHover(null)}>
               {[1, 2, 3, 4, 5].map((value) => (
                 <button
@@ -91,12 +92,12 @@ export function FeedbackForm() {
           />
 
           <TextArea
-            label="Your note"
+            label="Your experience"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={4}
             required
-            hint="About your experience — no medical details, please."
+            hint="Please share your experience without including private medical details."
           />
 
           <Field
@@ -106,14 +107,14 @@ export function FeedbackForm() {
           />
 
           <ConsentCheckbox checked={consent} onChange={setConsent}>
-            Dr Bansal may read this and publish it on the site, with or without my name, at her
-            discretion.
+            I understand that Dr Bansal may review my feedback and may publish it on the website,
+            with or without my name, as permitted by the consent I provide.
           </ConsentCheckbox>
 
           {error && <Notice>{error}</Notice>}
 
           <SubmitButton busy={busy} disabled={!consent}>
-            Send note
+            Send feedback
           </SubmitButton>
         </motion.form>
     )

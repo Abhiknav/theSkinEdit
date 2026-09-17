@@ -1,8 +1,11 @@
-import Link from "next/link";
-
 import { Brand } from "@/components/site/Brand";
-import { CLINIC, NAV } from "@/lib/content";
+import { CLINIC, FOOTER, NAV } from "@/lib/content";
 
+/**
+ * The doctor dashboard lives at /doctor. It is deliberately not linked from
+ * here — the route and its auth are untouched, it simply is not a public
+ * navigation item.
+ */
 export function Footer() {
   return (
     <footer className="band-deep">
@@ -11,12 +14,11 @@ export function Footer() {
           <div>
             <Brand stacked className="[&_.bg-border]:bg-white/20" />
             <p className="mt-5 max-w-sm text-[0.95rem] leading-relaxed text-soft">
-              Dermatology, trichology and aesthetic medicine in {CLINIC.city} — practised slowly,
-              explained fully.
+              {FOOTER.tagline}
             </p>
           </div>
 
-          <nav className="flex flex-wrap gap-x-7 gap-y-3">
+          <nav aria-label="Footer" className="flex flex-wrap gap-x-7 gap-y-3">
             {NAV.map((item) => (
               <a
                 key={item.href}
@@ -38,15 +40,9 @@ export function Footer() {
         <div className="mt-8 flex flex-col gap-4 text-[0.78rem] text-faint sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {new Date().getFullYear()} {CLINIC.brand} · {CLINIC.doctor.name},{" "}
-            {CLINIC.doctor.registration}
+            {CLINIC.doctor.registrationShort}
           </p>
-          <p className="max-w-lg">
-            Booking details only — no medical records are stored here. Consent recorded at booking
-            under the DPDP Act 2023.{" "}
-            <Link href="/doctor" className="text-soft transition-colors hover:text-copper">
-              Doctor sign in
-            </Link>
-          </p>
+          <p className="max-w-lg">{FOOTER.note}</p>
         </div>
       </div>
     </footer>
