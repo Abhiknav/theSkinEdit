@@ -58,14 +58,16 @@ export function Hero() {
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.25, ease: EASE }}
-              className="label"
+              className="label label-wrap"
             >
               {HERO.label}
             </motion.span>
 
             {/* Height-aware on desktop: the smaller of width- and height-based sizes wins. */}
             <h1 className="display mt-6 lg:mt-[2.4vh] lg:text-[clamp(2.2rem,min(4.4vw,7.6vh),3.9rem)]">
-              <SplitText text={HERO.title} play="mount" delay={0.3} />
+              <SplitText text={HERO.title} play="mount" delay={0.3} />{" "}
+              {/* The space above is a real word boundary for crawlers and screen
+                  readers; it collapses at the line break, so nothing moves. */}
               <br />
               <SplitText text={HERO.accent} play="mount" delay={0.52} className="accent" />
             </h1>
@@ -139,7 +141,7 @@ export function Hero() {
               >
                 <Image
                   src={CLINIC.doctor.photo}
-                  alt={`${CLINIC.doctor.name}, dermatologist`}
+                  alt={CLINIC.doctor.photoAlt}
                   fill
                   priority
                   sizes="(max-width: 640px) 17rem, (max-width: 1024px) 21rem, 26rem"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useState, type ReactNode } from "react";
 
 /**
  * Scroll-reveal system.
@@ -117,14 +117,16 @@ export function SplitText({
       className={`split ${hide ? "split-armed" : ""} ${shown ? "in" : ""} ${className}`}
       style={{ "--split-delay": `${delay}s` } as React.CSSProperties}
     >
+      {/* Real space characters between the word masks, not a margin: adjacent
+          inline-blocks with no whitespace give the browser no break opportunity
+          and read as one run of text to crawlers and screen readers. */}
       {words.map((word, i) => (
-        <span
-          key={`${word}-${i}`}
-          className={`w${i < words.length - 1 ? " mr-[0.26em]" : ""}`}
-          style={{ "--i": i } as React.CSSProperties}
-        >
-          <span>{word}</span>
-        </span>
+        <Fragment key={`${word}-${i}`}>
+          <span className="w" style={{ "--i": i } as React.CSSProperties}>
+            <span>{word}</span>
+          </span>
+          {i < words.length - 1 ? " " : null}
+        </Fragment>
       ))}
     </span>
   );

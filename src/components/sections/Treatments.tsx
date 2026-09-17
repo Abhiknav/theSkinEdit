@@ -30,9 +30,9 @@ export function Treatments() {
       <div className="wrap">
         <SectionHead
           label="Treatments"
-          title="Eight things we do"
-          accent="properly."
-          lede="Every plan starts with a diagnosis and ends in writing — what it costs, how long it takes, and what it will realistically look like."
+          title="What we"
+          accent="treat"
+          lede="Every consultation starts with understanding the problem. Treatment is then tailored to the diagnosis, your goals and what is realistically appropriate for your skin, hair or scalp."
         />
 
         <div className="mt-14 grid gap-10 lg:mt-16 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
@@ -178,7 +178,7 @@ export function Treatments() {
                 </ul>
 
                 <a href="#book" className="btn btn-ghost mt-7">
-                  Book for this
+                  {service.cta}
                   <span className="arw" aria-hidden>
                     →
                   </span>

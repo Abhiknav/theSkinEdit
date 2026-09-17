@@ -105,11 +105,11 @@ export function renderMessage(
     case "feedback_request":
       return {
         subject: "How was your visit?",
-        text: `Thank you for visiting The Skin Edit. Share a note: ${SITE_URL}/?ref=${appointment.reference}#voices`,
+        text: `Thank you for visiting The Skin Edit. Share your experience: ${SITE_URL}/?ref=${appointment.reference}#voices`,
         html: shell(
           "Thank you for visiting.",
           `<p style="font-size:15px;line-height:1.8;margin:0 0 20px">If you have a minute, a short note about your visit helps other patients decide — and tells us what to keep doing.</p>
-           <p style="margin:24px 0 0"><a href="${SITE_URL}/?ref=${appointment.reference}#voices" style="display:inline-block;background:#b4693f;color:#ffffff;text-decoration:none;padding:13px 24px;font-size:13px;letter-spacing:0.14em;text-transform:uppercase">Leave a note</a></p>`,
+           <p style="margin:24px 0 0"><a href="${SITE_URL}/?ref=${appointment.reference}#voices" style="display:inline-block;background:#b4693f;color:#ffffff;text-decoration:none;padding:13px 24px;font-size:13px;letter-spacing:0.14em;text-transform:uppercase">Share your experience</a></p>`,
           "Nothing is published without review, and never with your full name unless you ask.",
         ),
       };

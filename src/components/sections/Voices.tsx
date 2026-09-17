@@ -1,7 +1,7 @@
 import { Reveal, SectionHead } from "@/components/motion";
 import { FeedbackForm } from "@/components/site/FeedbackForm";
 import { Ribbon } from "@/components/site/Ribbon";
-import { SAMPLE_TESTIMONIALS } from "@/lib/content";
+import { VOICES } from "@/lib/content";
 
 export interface TestimonialItem {
   id: string;
@@ -15,7 +15,7 @@ function Stars({ rating }: { rating: number }) {
   return (
     <div className="flex gap-1 text-copper" aria-label={`${rating} out of 5`}>
       {Array.from({ length: 5 }).map((_, i) => (
-        <span key={i} className={i < rating ? "opacity-100" : "opacity-25"}>
+        <span key={i} className={i < rating ? "opacity-100" : "opacity-25"} aria-hidden>
           ✦
         </span>
       ))}
@@ -37,23 +37,27 @@ function Note({ item }: { item: TestimonialItem }) {
   );
 }
 
+/**
+ * Only genuine, doctor-approved notes are ever shown. With none published yet
+ * the ribbon is simply not rendered — no sample cards, no filler quotes.
+ */
 export function Voices({ testimonials }: { testimonials: TestimonialItem[] }) {
-  const isSample = testimonials.length === 0;
-  const items = isSample ? SAMPLE_TESTIMONIALS : testimonials;
+  const hasNotes = testimonials.length > 0;
   /** A ribbon needs enough cards to fill the track twice over. */
-  const filled = items.length >= 4 ? items : [...items, ...items, ...items].slice(0, 6);
+  const filled =
+    testimonials.length >= 4
+      ? testimonials
+      : [...testimonials, ...testimonials, ...testimonials].slice(0, 6);
 
   return (
     <section id="voices" className="band overflow-x-clip">
       <div className="wrap">
         <div className="grid gap-12 lg:grid-cols-[1fr_0.72fr] lg:gap-16">
           <div className="min-w-0">
-            <SectionHead label="Voices" title="What patients" accent="say." />
-            {isSample && (
-              <Reveal kind="fade" delay={0.1}>
-                <p className="mt-7 inline-flex rounded-full border border-copper-soft bg-copper-wash px-4 py-2 font-mono text-[0.62rem] tracking-[0.12em] text-copper uppercase">
-                  Placeholder — real notes appear once approved
-                </p>
+            <SectionHead label={VOICES.label} title={VOICES.title} accent={VOICES.accent} />
+            {!hasNotes && (
+              <Reveal kind="up" delay={0.1} duration={0.8}>
+                <p className="lede mt-7 max-w-[46ch]">{VOICES.empty}</p>
               </Reveal>
             )}
           </div>
@@ -65,14 +69,16 @@ export function Voices({ testimonials }: { testimonials: TestimonialItem[] }) {
       </div>
 
       {/* Full-bleed so the notes run past the page gutters. */}
-      <Reveal kind="fade" duration={0.9} className="mt-14">
-        <Ribbon
-          items={filled.map((item) => <Note key={item.id} item={item} />)}
-          separator={false}
-          itemClassName="px-3"
-          duration={64}
-        />
-      </Reveal>
+      {hasNotes && (
+        <Reveal kind="fade" duration={0.9} className="mt-14">
+          <Ribbon
+            items={filled.map((item, i) => <Note key={`${item.id}-${i}`} item={item} />)}
+            separator={false}
+            itemClassName="px-3"
+            duration={64}
+          />
+        </Reveal>
+      )}
     </section>
   );
 }
