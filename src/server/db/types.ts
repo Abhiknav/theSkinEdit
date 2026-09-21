@@ -78,6 +78,18 @@ export interface Appointment {
   doctor_id: ID;
   slot_id: ID;
   patient_id: ID;
+  /**
+   * The patient's details as given at booking, held on the appointment itself.
+   *
+   * `patient_id` still links to the person, but that row tracks their latest
+   * contact details and is shared by everyone on the same phone. Reading names
+   * and addresses through it made every past appointment change whenever
+   * someone booked again — so these three are the source of truth for anything
+   * describing or contacting an appointment, and never change once written.
+   */
+  patient_name: string;
+  patient_phone: string;
+  patient_email: string;
   mode: ConsultMode;
   status: AppointmentStatus;
   /** Free-text reason for visit. Deliberately NOT clinical notes — see DPDP note in README. */

@@ -114,9 +114,9 @@ export async function getAppointments(daysBack = 7, daysForward = 60): Promise<D
     endAt: a.slot.end_at,
     mode: a.mode,
     status: a.status,
-    patientName: a.patient.full_name,
-    patientPhone: a.patient.phone,
-    patientEmail: a.patient.email,
+    patientName: a.patient_name,
+    patientPhone: a.patient_phone,
+    patientEmail: a.patient_email,
     reason: a.reason,
   }));
 }

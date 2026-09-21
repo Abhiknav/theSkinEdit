@@ -122,13 +122,11 @@ check the spelling of the variable name and that you redeployed after adding it.
 Appointments taken before the database existed were only ever in a temp folder. They
 cannot be recovered, so anyone who booked will need to book again.
 
-### One thing to decide first
+### If you already ran this before September 2026
 
-`patients.phone` is currently `unique`, and a booking overwrites the name and email on
-the matching row. Two people sharing a phone number — common in a family — end up on
-one record, and the newer booking silently renames the older appointment. Fixing that
-properly changes the schema, so it is much easier to do **before** this database has
-real appointments in it than after.
+`npm run db:setup` is also how schema changes reach an existing database. Re-run it
+against the same `DATABASE_URL` and redeploy; it migrates in place and leaves your
+appointments alone.
 
 ## Vercel Hobby is free — but not for a clinic
 
