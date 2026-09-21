@@ -80,11 +80,26 @@ export async function ensureSlots(store: Store, doctor: Doctor, from: Date, to: 
   }
 }
 
+/**
+ * Why a slot cannot be booked, rather than just that it cannot be.
+ *
+ *  - `booked`   someone else has it. Shown, clearly marked, because a diary
+ *               with visible gaps is what tells a patient the calendar is real.
+ *  - `too_soon` free, but inside the lead time, so it cannot be self-booked.
+ *               Hiding it would make today look emptier than it is.
+ *
+ * Doctor-blocked slots are not in this union: they are filtered out entirely
+ * below, since "the clinic is not consulting then" is not information a patient
+ * needs one chip at a time.
+ */
+export type SlotState = "open" | "booked" | "too_soon";
+
 export interface PublicSlot {
   id: string;
   startAt: string;
   endAt: string;
   available: boolean;
+  state: SlotState;
   modes: string[];
 }
 
@@ -97,13 +112,17 @@ export interface AvailabilityDay {
   isToday: boolean;
   total: number;
   open: number;
+  booked: number;
   slots: PublicSlot[];
 }
 
 /**
- * The shape the calendar consumes. Booked and blocked slots are returned too —
- * showing a struck-through slot reads as an honest live calendar, and it keeps
- * layout stable when a slot disappears under a patient mid-session.
+ * The shape the calendar consumes.
+ *
+ * Booked slots are returned alongside open ones and carry a state saying so,
+ * which is what lets the grid label them instead of greying them out
+ * ambiguously — and it keeps the layout stable when a slot is taken under a
+ * patient mid-session. Blocked slots are dropped.
  */
 export function groupSlotsByDay(slots: Slot[], doctor: Doctor, mode?: string): AvailabilityDay[] {
   const cutoff = Date.now() + LEAD_TIME_MINUTES * 60000;
@@ -111,15 +130,22 @@ export function groupSlotsByDay(slots: Slot[], doctor: Doctor, mode?: string): A
 
   for (const slot of slots) {
     if (mode && !slot.modes.includes(mode as never)) continue;
+    // Time the clinic never offered: not a gap in the diary, just not on it.
+    if (slot.status === "blocked") continue;
     const startMs = new Date(slot.start_at).getTime();
     if (startMs < Date.now()) continue;
+
+    const state: SlotState =
+      slot.status === "booked" ? "booked" : startMs < cutoff ? "too_soon" : "open";
+
     const key = dateKeyInZone(new Date(slot.start_at), doctor.timezone);
     const list = byDay.get(key) ?? [];
     list.push({
       id: slot.id,
       startAt: slot.start_at,
       endAt: slot.end_at,
-      available: slot.status === "open" && startMs >= cutoff,
+      available: state === "open",
+      state,
       modes: slot.modes,
     });
     byDay.set(key, list);
@@ -142,7 +168,8 @@ export function groupSlotsByDay(slots: Slot[], doctor: Doctor, mode?: string): A
         monthShort: fmt({ month: "short" }),
         isToday: dateKey === todayKey,
         total: list.length,
-        open: list.filter((s) => s.available).length,
+        open: list.filter((s) => s.state === "open").length,
+        booked: list.filter((s) => s.state === "booked").length,
         slots: list.sort((a, b) => a.startAt.localeCompare(b.startAt)),
       };
     });

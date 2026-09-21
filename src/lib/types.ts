@@ -2,11 +2,15 @@
 
 export type ConsultMode = "clinic" | "online";
 
+/** Why a slot cannot be booked — see src/server/booking/slots.ts. */
+export type SlotState = "open" | "booked" | "too_soon";
+
 export interface PublicSlot {
   id: string;
   startAt: string;
   endAt: string;
   available: boolean;
+  state: SlotState;
   modes: string[];
 }
 
@@ -19,6 +23,7 @@ export interface AvailabilityDay {
   isToday: boolean;
   total: number;
   open: number;
+  booked: number;
   slots: PublicSlot[];
 }
 

@@ -39,14 +39,19 @@ export function BookingFlow() {
     setDateKey((days.find((d) => d.open > 0) ?? days[0]).dateKey);
   }, [days, dateKey]);
 
-  // Someone else took the slot under us — say so rather than failing at submit.
+  // The slot stopped being bookable under us — say which, rather than failing
+  // at submit. A slot can also simply age past the lead time while the form is
+  // open, which is not the same thing as someone else taking it.
   useEffect(() => {
     if (!slot || !data) return;
     const current = data.days.flatMap((d) => d.slots).find((c) => c.id === slot.id);
-    if (!current || !current.available) {
-      setSlot(null);
-      setLiveNotice("That time was taken a moment ago. Please pick another — the calendar is already up to date.");
-    }
+    if (current?.available) return;
+    setSlot(null);
+    setLiveNotice(
+      current?.state === "too_soon"
+        ? "That time is now too close to book online. Please pick a later one, or call the clinic."
+        : "That time was booked a moment ago. Please pick another — the calendar is already up to date.",
+    );
   }, [liveTick, data, slot]);
 
   function chooseSlot(next: PublicSlot) {
