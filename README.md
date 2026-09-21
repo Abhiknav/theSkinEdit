@@ -62,7 +62,7 @@ src/
     booking/admin.ts       doctor-side business logic
     booking/slots.ts       slot materialisation from weekly rules
     booking/time.ts        clinic-timezone helpers
-    db/                    Store contract + two drivers + schema.sql
+    db/                    Store contract + two drivers + schema.ts
     notifications/         job scheduling, delivery, templates
     auth/doctor.ts         session cookie (swap for Clerk/Supabase Auth)
     realtime/bus.ts        SSE pub/sub
@@ -99,14 +99,21 @@ unique: a household shares a number, and two people on one phone are two patient
 | **File** | default | JSON document in `.data/`, mutations serialised through a process mutex |
 | **Postgres** | `DATABASE_URL` set | real transactions, `FOR UPDATE` row locks, FK constraints |
 
-To move to Supabase or Neon:
+To move to Supabase or Neon, set the connection string and restart:
 
 ```bash
 # .env.local
 DATABASE_URL=postgresql://...
-
-npm run db:setup   # applies src/server/db/schema.sql
 ```
+
+The Postgres driver applies `src/server/db/schema.ts` itself on its first connection,
+creating the tables or bringing an older database up to date, then seeds the doctor row
+and her consulting rules. A deployment therefore needs nothing but the variable — no
+shell step, which matters when the site is administered from a phone. The statements
+are all idempotent, guarded by a cheap "is it already current?" check so a warm database
+costs nothing on a cold start, and serialised by a Postgres advisory lock so instances
+booting together cannot race. `npm run db:setup` runs the same statements from a
+terminal, and is optional.
 
 Nothing else changes — `getStore()` picks the driver and every caller is driver-agnostic.
 

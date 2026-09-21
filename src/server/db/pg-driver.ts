@@ -11,6 +11,7 @@
 import { Pool, type PoolClient } from "pg";
 
 import { BookingError } from "./errors";
+import { SCHEMA_SQL } from "./schema";
 import { DEFAULT_DOCTOR, DEFAULT_RULES, newReference } from "./seed";
 import type {
   Appointment,
@@ -145,8 +146,34 @@ export class PostgresStore implements Store {
     }
   }
 
+  /**
+   * Creates the tables, or brings an older database up to date.
+   *
+   * Cheap to call: the two checks below cost one query, and the schema is only
+   * applied when something is actually missing — so an already-current database
+   * pays nothing on a cold start. The advisory lock serialises instances that
+   * boot at the same moment, since applying DDL twice at once is not safe even
+   * when each statement is idempotent on its own.
+   */
+  private async ensureSchema(c: PoolClient) {
+    const { rows } = await c.query(`
+      select to_regclass('public.appointments') is not null as installed,
+             exists (
+               select 1 from information_schema.columns
+                where table_schema = 'public'
+                  and table_name = 'appointments'
+                  and column_name = 'patient_name'
+             ) as current
+    `);
+    if (rows[0].installed && rows[0].current) return;
+
+    await c.query("select pg_advisory_xact_lock(hashtext('theskinedit:schema'))");
+    await c.query(SCHEMA_SQL);
+  }
+
   async init() {
     await this.tx(async (c) => {
+      await this.ensureSchema(c);
       const { rows } = await c.query("select id from doctors where slug = $1", [DEFAULT_DOCTOR.slug]);
       let doctorId = rows[0]?.id as string | undefined;
       if (!doctorId) {

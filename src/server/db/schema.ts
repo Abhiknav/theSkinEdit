@@ -1,3 +1,17 @@
+/**
+ * The database schema, as TypeScript rather than a .sql file.
+ *
+ * The app applies this itself on first connection (see PostgresStore.init), so
+ * a deployment needs nothing but DATABASE_URL — no shell, no laptop. Keeping
+ * the statements in a module guarantees they are bundled into the serverless
+ * output; a .sql file read from disk at runtime depends on file tracing and
+ * fails silently when it is wrong.
+ *
+ * Every statement is idempotent, so this is both the installer and the
+ * migration path: applying it to an existing database brings it up to date and
+ * leaves its rows alone.
+ */
+export const SCHEMA_SQL = `
 -- The Skin Edit — PostgreSQL schema (Supabase / Neon compatible)
 -- Applied automatically on first boot when DATABASE_URL is set.
 
@@ -149,3 +163,4 @@ alter table appointments alter column patient_email set not null;
 
 -- Two people may share a phone number.
 alter table patients drop constraint if exists patients_phone_key;
+`;
