@@ -31,8 +31,9 @@ In Vercel: **Project → Settings → Environment Variables**. Tick *Production*
 | `AUTH_SECRET` | Any long random string. Generate one at https://generate-secret.vercel.app/32 |
 | `DOCTOR_EMAIL` | The email Dr Bansal signs in with |
 | `DOCTOR_PASSWORD` | A real password — **not** the `skinedit` dev default |
+| `DATABASE_URL` | Postgres connection string. Not needed to preview the design, but **appointments are lost without it** — see [Connecting the database](#️-connecting-the-database) |
 
-That is all three. **You do not need to set a site URL** — the app reads Vercel's own
+**You do not need to set a site URL** — the app reads Vercel's own
 `VERCEL_PROJECT_PRODUCTION_URL`, which is always present and switches to your custom
 domain by itself the day you add one. Set `NEXT_PUBLIC_SITE_URL` only if you want to
 force a specific address; it overrides everything else.
@@ -41,7 +42,6 @@ force a specific address; it overrides everything else.
 
 | Name | What it turns on |
 | --- | --- |
-| `DATABASE_URL` | Real Postgres. **Read the warning below.** |
 | `RESEND_API_KEY` | Sends confirmation emails for real instead of logging them |
 | `NOTIFICATION_FROM` | e.g. `The Skin Edit <appointments@theskinedit.in>` |
 | `CRON_SECRET` | Locks the cron endpoint to Vercel's scheduler |
@@ -54,28 +54,81 @@ page metadata follow the new domain on the next deploy by themselves.
 
 ---
 
-## ⚠️ Bookings do not persist yet
+## ⚠️ Connecting the database
 
-Without `DATABASE_URL`, the app stores data in a temporary file on the server.
-On Vercel that file lives in a scratch directory that **is wiped between requests**,
-so appointments made on the live site can vanish.
+**Until `DATABASE_URL` is set, appointments are lost.** Without it the app falls back
+to a file store. On Vercel that file lives in the temp directory of whichever server
+instance handled the request — not shared with the other instances, and wiped when one
+restarts. So a patient books, sees a confirmation, and the appointment is simply not in
+the diary when you open it. Nothing errors; it just is not there. The dashboard shows a
+warning while the site is in this state.
 
-**This is fine for reviewing the design. It is not fine for real patients.**
+The Postgres driver, schema, transactions and row locks are already written. Connecting
+a database is the only step left, and it takes about ten minutes.
 
-To fix it, takes about ten minutes:
+### 1. Create the database
 
-1. Create a free Postgres database at **https://neon.tech** or **https://supabase.com**
-2. Copy the connection string into Vercel as `DATABASE_URL`
-3. Run the schema once from your laptop:
-   ```bash
-   DATABASE_URL="postgresql://..." npm run db:setup
-   ```
-4. Redeploy
+Either provider is free to start and both work as-is:
 
-Everything else is already written for it — the Postgres driver, transactions and
-row locks exist and only wait for that one variable.
+- **Neon** — https://neon.tech → *New Project* → copy the connection string shown
+- **Supabase** — https://supabase.com → *New Project* → *Connect* → *Connection string*
+  → **URI**, and replace `[YOUR-PASSWORD]` with the database password you chose
 
----
+You want the string that begins `postgresql://`. Either provider's pooled or direct
+string works; TLS is handled by the app, so no `sslmode` parameter is needed.
+
+### 2. Create the tables, once, from a laptop
+
+From the project folder, with your own connection string in the quotes:
+
+```bash
+npm install
+DATABASE_URL="postgresql://..." npm run db:setup
+```
+
+It prints `Schema applied.` and creates eight tables: `doctors`, `patients`,
+`availability_rules`, `availability_blocks`, `slots`, `appointments`, `feedback`,
+`notifications`. The script is idempotent — running it twice is harmless, so it is also
+how you apply schema changes later.
+
+### 3. Give the variable to Vercel
+
+**Project → Settings → Environment Variables → Add**
+
+- Name: `DATABASE_URL`
+- Value: the same connection string
+- Tick **Production**, **Preview** and **Development**
+
+### 4. Redeploy
+
+**Deployments → the most recent one → ⋯ → Redeploy.** Environment variables are read at
+build and boot, so an existing deployment will not pick it up on its own.
+
+On the first request after that, the app inserts Dr Bansal's record and her four
+weekly consulting rules by itself. There is nothing to seed by hand.
+
+### 5. Check it worked
+
+1. Open the live site and book a test appointment
+2. Sign in at `/doctor` — it should appear under **Upcoming**, and the storage warning
+   on that page should be gone
+3. Cancel the test appointment; the slot returns to the calendar immediately
+
+If the warning is still there, `DATABASE_URL` did not reach the running deployment —
+check the spelling of the variable name and that you redeployed after adding it.
+
+### Anything already booked is gone
+
+Appointments taken before the database existed were only ever in a temp folder. They
+cannot be recovered, so anyone who booked will need to book again.
+
+### One thing to decide first
+
+`patients.phone` is currently `unique`, and a booking overwrites the name and email on
+the matching row. Two people sharing a phone number — common in a family — end up on
+one record, and the newer booking silently renames the older appointment. Fixing that
+properly changes the schema, so it is much easier to do **before** this database has
+real appointments in it than after.
 
 ## Vercel Hobby is free — but not for a clinic
 
