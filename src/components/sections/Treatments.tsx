@@ -97,81 +97,85 @@ export function Treatments() {
         <div className="mt-14 grid gap-10 lg:mt-16 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
           {/* ---------------- Wheel ---------------- */}
           <Reveal kind="cornerLeft" duration={1} className="min-w-0">
-            <div className="relative select-none">
-              {/* The band the selected treatment sits in. */}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 top-1/2 z-0 -translate-y-1/2 rounded-2xl border border-copper/35 bg-copper-wash/70"
-                style={{ height: ITEM_H }}
-              />
+            <div className="select-none">
+              {/* The band must be centred on the scroller alone. Centring it on a
+                  wrapper that also holds the controls below pushed it half their
+                  height down, so the selected row sat against its top edge. */}
+              <div className="relative">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-0 top-1/2 z-0 -translate-y-1/2 rounded-2xl border border-copper/35 bg-copper-wash/70"
+                  style={{ height: ITEM_H }}
+                />
 
-              <div
-                ref={scroller}
-                onScroll={onScroll}
-                className="wheel relative"
-                role="listbox"
-                aria-label="Treatments"
-                aria-activedescendant={`treatment-${service.slug}`}
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "ArrowDown" || e.key === "ArrowRight") {
-                    e.preventDefault();
-                    goTo(active + 1);
-                  }
-                  if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
-                    e.preventDefault();
-                    goTo(active - 1);
-                  }
-                  if (e.key === "Home") {
-                    e.preventDefault();
-                    goTo(0);
-                  }
-                  if (e.key === "End") {
-                    e.preventDefault();
-                    goTo(SERVICES.length - 1);
-                  }
-                }}
-              >
-                {SERVICES.map((item, i) => {
-                  const isActive = i === active;
-                  return (
-                    <button
-                      key={item.slug}
-                      id={`treatment-${item.slug}`}
-                      ref={(node) => {
-                        items.current[i] = node;
-                      }}
-                      type="button"
-                      role="option"
-                      aria-selected={isActive}
-                      tabIndex={-1}
-                      onClick={() => goTo(i)}
-                      className="wheel-item flex w-full items-center gap-4 px-4 text-left sm:gap-5 sm:px-6"
-                    >
-                      <span
-                        className={`font-mono text-[0.66rem] tracking-[0.1em] transition-colors duration-300 ${
-                          isActive ? "text-copper" : "text-faint"
-                        }`}
+                <div
+                  ref={scroller}
+                  onScroll={onScroll}
+                  className="wheel relative"
+                  role="listbox"
+                  aria-label="Treatments"
+                  aria-activedescendant={`treatment-${service.slug}`}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+                      e.preventDefault();
+                      goTo(active + 1);
+                    }
+                    if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+                      e.preventDefault();
+                      goTo(active - 1);
+                    }
+                    if (e.key === "Home") {
+                      e.preventDefault();
+                      goTo(0);
+                    }
+                    if (e.key === "End") {
+                      e.preventDefault();
+                      goTo(SERVICES.length - 1);
+                    }
+                  }}
+                >
+                  {SERVICES.map((item, i) => {
+                    const isActive = i === active;
+                    return (
+                      <button
+                        key={item.slug}
+                        id={`treatment-${item.slug}`}
+                        ref={(node) => {
+                          items.current[i] = node;
+                        }}
+                        type="button"
+                        role="option"
+                        aria-selected={isActive}
+                        tabIndex={-1}
+                        onClick={() => goTo(i)}
+                        className="wheel-item flex w-full items-center gap-4 px-4 text-left sm:gap-5 sm:px-6"
                       >
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span
-                        className={`flex-1 truncate font-display leading-tight transition-colors duration-300 ${
-                          isActive
-                            ? "text-[1.5rem] text-ink sm:text-[1.8rem]"
-                            : "text-[1.25rem] text-soft sm:text-[1.45rem]"
-                        }`}
-                      >
-                        {item.name}
-                      </span>
-                      {isActive && (
-                        <span className="hidden font-mono text-[0.58rem] tracking-[0.12em] text-copper uppercase sm:block">
-                          {item.group}
+                        <span
+                          className={`font-mono text-[0.66rem] tracking-[0.1em] transition-colors duration-300 ${
+                            isActive ? "text-copper" : "text-faint"
+                          }`}
+                        >
+                          {String(i + 1).padStart(2, "0")}
                         </span>
-                      )}
-                    </button>
-                  );
-                })}
+                        <span
+                          className={`flex-1 truncate font-display leading-tight transition-colors duration-300 ${
+                            isActive
+                              ? "text-[1.5rem] text-ink sm:text-[1.8rem]"
+                              : "text-[1.25rem] text-soft sm:text-[1.45rem]"
+                          }`}
+                        >
+                          {item.name}
+                        </span>
+                        {isActive && (
+                          <span className="hidden font-mono text-[0.58rem] tracking-[0.12em] text-copper uppercase sm:block">
+                            {item.group}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Wheel controls */}
