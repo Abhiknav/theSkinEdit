@@ -41,6 +41,14 @@ function Note({ item }: { item: TestimonialItem }) {
  * Only genuine, doctor-approved notes are ever shown. With none published yet
  * the ribbon is simply not rendered — no sample cards, no filler quotes.
  */
+/**
+ * Approved notes lead, the form follows.
+ *
+ * The form used to sit beside the heading, which on a phone put "write us a
+ * review" above the reviews themselves — asking before showing. Reading what
+ * other patients said is the reason to be in this section; contributing is the
+ * afterthought, so it comes last.
+ */
 export function Voices({ testimonials }: { testimonials: TestimonialItem[] }) {
   const hasNotes = testimonials.length > 0;
   /** A ribbon needs enough cards to fill the track twice over. */
@@ -52,25 +60,17 @@ export function Voices({ testimonials }: { testimonials: TestimonialItem[] }) {
   return (
     <section id="voices" className="band overflow-x-clip">
       <div className="wrap">
-        <div className="grid gap-12 lg:grid-cols-[1fr_0.72fr] lg:gap-16">
-          <div className="min-w-0">
-            <SectionHead label={VOICES.label} title={VOICES.title} accent={VOICES.accent} />
-            {!hasNotes && (
-              <Reveal kind="up" delay={0.1} duration={0.8}>
-                <p className="lede mt-7 max-w-[46ch]">{VOICES.empty}</p>
-              </Reveal>
-            )}
-          </div>
-
-          <Reveal kind="up" delay={0.1} className="min-w-0">
-            <FeedbackForm />
+        <SectionHead label={VOICES.label} title={VOICES.title} accent={VOICES.accent} />
+        {!hasNotes && (
+          <Reveal kind="up" delay={0.1} duration={0.8}>
+            <p className="lede mt-7 max-w-[46ch]">{VOICES.empty}</p>
           </Reveal>
-        </div>
+        )}
       </div>
 
       {/* Full-bleed so the notes run past the page gutters. */}
       {hasNotes && (
-        <Reveal kind="fade" duration={0.9} className="mt-14">
+        <Reveal kind="fade" duration={0.9} className="mt-12">
           <Ribbon
             items={filled.map((item, i) => <Note key={`${item.id}-${i}`} item={item} />)}
             separator={false}
@@ -79,6 +79,14 @@ export function Voices({ testimonials }: { testimonials: TestimonialItem[] }) {
           />
         </Reveal>
       )}
+
+      <div className="wrap">
+        <Reveal kind="up" delay={0.1} className={hasNotes ? "mt-14" : "mt-12"}>
+          <div className="mx-auto max-w-xl">
+            <FeedbackForm />
+          </div>
+        </Reveal>
+      </div>
     </section>
   );
 }
