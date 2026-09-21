@@ -1,3 +1,17 @@
+/**
+ * The database schema, as TypeScript rather than a .sql file.
+ *
+ * The app applies this itself on first connection (see PostgresStore.init), so
+ * a deployment needs nothing but DATABASE_URL — no shell, no laptop. Keeping
+ * the statements in a module guarantees they are bundled into the serverless
+ * output; a .sql file read from disk at runtime depends on file tracing and
+ * fails silently when it is wrong.
+ *
+ * Every statement is idempotent, so this is both the installer and the
+ * migration path: applying it to an existing database brings it up to date and
+ * leaves its rows alone.
+ */
+export const SCHEMA_SQL = `
 -- The Skin Edit — PostgreSQL schema (Supabase / Neon compatible)
 -- Applied automatically on first boot when DATABASE_URL is set.
 
@@ -18,7 +32,9 @@ create table if not exists patients (
   id           uuid primary key default gen_random_uuid(),
   doctor_id    uuid references doctors(id) on delete set null,
   full_name    text not null,
-  phone        text not null unique,
+  -- Not unique. Households share a number, and two people on one phone are two
+  -- patients, not one record that each booking overwrites.
+  phone        text not null,
   email        text not null,
   -- Reserved for the later patient-login phase; adding auth writes here only.
   auth_user_id text unique,
@@ -69,6 +85,12 @@ create table if not exists appointments (
   doctor_id  uuid not null references doctors(id) on delete cascade,
   slot_id    uuid not null references slots(id),
   patient_id uuid not null references patients(id),
+  -- The details exactly as given at booking. An appointment is a historical
+  -- record: it must not change later because the same person booked again with
+  -- a different spelling, or because someone else booked from the same phone.
+  patient_name  text not null,
+  patient_phone text not null,
+  patient_email text not null,
   mode       text not null check (mode in ('clinic','online')),
   status     text not null default 'confirmed'
              check (status in ('confirmed','cancelled','completed','no_show')),
@@ -79,6 +101,7 @@ create table if not exists appointments (
   updated_at timestamptz not null default now()
 );
 create index if not exists appointments_doctor_idx on appointments (doctor_id, status);
+create index if not exists patients_phone_idx on patients (phone);
 -- One live appointment per slot, enforced by the database rather than by hope.
 create unique index if not exists appointments_active_slot_idx
   on appointments (slot_id) where status in ('confirmed','completed','no_show');
@@ -109,3 +132,35 @@ create table if not exists notifications (
   created_at     timestamptz not null default now()
 );
 create index if not exists notifications_due_idx on notifications (status, send_at);
+
+-- ---------------------------------------------------------------------------
+-- Migrations
+--
+-- Everything above is CREATE ... IF NOT EXISTS, so it does nothing to a
+-- database that already has these tables. These statements bring such a
+-- database up to the shape above, and are no-ops on a fresh one. Re-running
+-- the whole file is safe either way.
+-- ---------------------------------------------------------------------------
+
+-- An appointment used to read the patient's name and email through a join, so
+-- a later booking from the same phone silently rewrote the older appointment.
+-- Give every appointment its own copy, backfilled from the linked patient.
+alter table appointments add column if not exists patient_name  text;
+alter table appointments add column if not exists patient_phone text;
+alter table appointments add column if not exists patient_email text;
+
+update appointments a
+   set patient_name  = coalesce(a.patient_name,  p.full_name),
+       patient_phone = coalesce(a.patient_phone, p.phone),
+       patient_email = coalesce(a.patient_email, p.email)
+  from patients p
+ where p.id = a.patient_id
+   and (a.patient_name is null or a.patient_phone is null or a.patient_email is null);
+
+alter table appointments alter column patient_name  set not null;
+alter table appointments alter column patient_phone set not null;
+alter table appointments alter column patient_email set not null;
+
+-- Two people may share a phone number.
+alter table patients drop constraint if exists patients_phone_key;
+`;

@@ -62,8 +62,8 @@ function toPublic(appointment: AppointmentDetail): PublicAppointment {
     mode: appointment.mode,
     startAt: appointment.slot.start_at,
     endAt: appointment.slot.end_at,
-    patientName: appointment.patient.full_name,
-    patientEmail: appointment.patient.email,
+    patientName: appointment.patient_name,
+    patientEmail: appointment.patient_email,
     reason: appointment.reason,
     canChange: appointment.status === "confirmed" && !isInsideCutoff(appointment),
     cutoffHours: CHANGE_CUTOFF_HOURS,
@@ -108,7 +108,7 @@ async function authorise(reference: string, phone: string): Promise<AppointmentD
   const store = await getStore();
   const appointment = await store.findAppointmentByReference(reference);
   if (!appointment) throw new BookingError("NOT_FOUND", "No booking matches that reference and phone number.");
-  if (normalisePhone(appointment.patient.phone) !== normalisePhone(phone)) {
+  if (normalisePhone(appointment.patient_phone) !== normalisePhone(phone)) {
     throw new BookingError("NOT_FOUND", "No booking matches that reference and phone number.");
   }
   return appointment;

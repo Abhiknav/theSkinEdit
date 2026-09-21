@@ -11,6 +11,7 @@
 import { Pool, type PoolClient } from "pg";
 
 import { BookingError } from "./errors";
+import { SCHEMA_SQL } from "./schema";
 import { DEFAULT_DOCTOR, DEFAULT_RULES, newReference } from "./seed";
 import type {
   Appointment,
@@ -72,6 +73,9 @@ function mapAppointment(r: Row): Appointment {
     doctor_id: r.doctor_id as string,
     slot_id: r.slot_id as string,
     patient_id: r.patient_id as string,
+    patient_name: r.patient_name as string,
+    patient_phone: r.patient_phone as string,
+    patient_email: r.patient_email as string,
     mode: r.mode as ConsultMode,
     status: r.status as AppointmentStatus,
     reason: (r.reason as string) ?? null,
@@ -142,8 +146,34 @@ export class PostgresStore implements Store {
     }
   }
 
+  /**
+   * Creates the tables, or brings an older database up to date.
+   *
+   * Cheap to call: the two checks below cost one query, and the schema is only
+   * applied when something is actually missing — so an already-current database
+   * pays nothing on a cold start. The advisory lock serialises instances that
+   * boot at the same moment, since applying DDL twice at once is not safe even
+   * when each statement is idempotent on its own.
+   */
+  private async ensureSchema(c: PoolClient) {
+    const { rows } = await c.query(`
+      select to_regclass('public.appointments') is not null as installed,
+             exists (
+               select 1 from information_schema.columns
+                where table_schema = 'public'
+                  and table_name = 'appointments'
+                  and column_name = 'patient_name'
+             ) as current
+    `);
+    if (rows[0].installed && rows[0].current) return;
+
+    await c.query("select pg_advisory_xact_lock(hashtext('theskinedit:schema'))");
+    await c.query(SCHEMA_SQL);
+  }
+
   async init() {
     await this.tx(async (c) => {
+      await this.ensureSchema(c);
       const { rows } = await c.query("select id from doctors where slug = $1", [DEFAULT_DOCTOR.slug]);
       let doctorId = rows[0]?.id as string | undefined;
       if (!doctorId) {
@@ -295,17 +325,31 @@ export class PostgresStore implements Store {
     return rowCount ?? 0;
   }
 
+  /**
+   * Finds the person, or records a new one.
+   *
+   * Matched on phone *and* name, because a phone number identifies a household
+   * rather than a person: a mother and her son booking from the same number are
+   * two patients. Only the matched person's contact details are refreshed.
+   */
   private async upsertPatient(c: PoolClient, doctorId: ID, input: BookSlotInput["patient"]) {
+    const fullName = input.fullName.trim();
+    const phone = input.phone.trim();
+    const email = input.email.trim().toLowerCase();
+
+    const { rows: found } = await c.query(
+      `update patients
+          set email = $3, consent_at = now(), updated_at = now()
+        where phone = $1 and lower(full_name) = lower($2)
+       returning *`,
+      [phone, fullName, email],
+    );
+    if (found[0]) return mapPatient(found[0]);
+
     const { rows } = await c.query(
       `insert into patients (doctor_id, full_name, phone, email, consent_at)
-       values ($1,$2,$3,$4, now())
-       on conflict (phone) do update
-         set full_name = excluded.full_name,
-             email = excluded.email,
-             consent_at = now(),
-             updated_at = now()
-       returning *`,
-      [doctorId, input.fullName.trim(), input.phone.trim(), input.email.trim().toLowerCase()],
+       values ($1,$2,$3,$4, now()) returning *`,
+      [doctorId, fullName, phone, email],
     );
     return mapPatient(rows[0]);
   }
@@ -345,9 +389,21 @@ export class PostgresStore implements Store {
       for (let attempt = 0; attempt < 5 && !appointmentId; attempt += 1) {
         try {
           const created = await c.query(
-            `insert into appointments (reference, doctor_id, slot_id, patient_id, mode, reason, consent_at)
-             values ($1,$2,$3,$4,$5,$6, now()) returning id`,
-            [newReference(), input.doctorId, slot.id, patient.id, input.mode, input.reason?.trim() || null],
+            `insert into appointments
+               (reference, doctor_id, slot_id, patient_id,
+                patient_name, patient_phone, patient_email, mode, reason, consent_at)
+             values ($1,$2,$3,$4,$5,$6,$7,$8,$9, now()) returning id`,
+            [
+              newReference(),
+              input.doctorId,
+              slot.id,
+              patient.id,
+              patient.full_name,
+              patient.phone,
+              patient.email,
+              input.mode,
+              input.reason?.trim() || null,
+            ],
           );
           appointmentId = created.rows[0].id as string;
         } catch (error) {

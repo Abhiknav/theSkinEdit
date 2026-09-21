@@ -64,6 +64,30 @@ export async function removeBlock(blockId: string) {
   publishSlotChange(doctor.id, []);
 }
 
+/**
+ * Whether the dashboard can trust what it is showing.
+ *
+ * Without DATABASE_URL the app falls back to the file store. Locally that is
+ * one process reading one file and everything works. On a serverless host it
+ * writes to the instance's own temp directory, which is not shared between
+ * instances and is wiped on a cold start — so a booking taken by one instance
+ * is simply not there when another serves this page. That failure is silent
+ * and looks exactly like "my appointments are not showing up", which is why
+ * the dashboard says it out loud.
+ */
+export interface StorageHealth {
+  durable: boolean;
+  /** True when the store is also not shared between requests. */
+  ephemeral: boolean;
+}
+
+export async function getStorageHealth(): Promise<StorageHealth> {
+  const store = await getStore();
+  if (store.kind === "postgres") return { durable: true, ephemeral: false };
+  const serverless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+  return { durable: false, ephemeral: serverless };
+}
+
 export interface DashboardAppointment {
   id: string;
   reference: string;
@@ -90,9 +114,9 @@ export async function getAppointments(daysBack = 7, daysForward = 60): Promise<D
     endAt: a.slot.end_at,
     mode: a.mode,
     status: a.status,
-    patientName: a.patient.full_name,
-    patientPhone: a.patient.phone,
-    patientEmail: a.patient.email,
+    patientName: a.patient_name,
+    patientPhone: a.patient_phone,
+    patientEmail: a.patient_email,
     reason: a.reason,
   }));
 }

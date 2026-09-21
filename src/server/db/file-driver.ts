@@ -262,12 +262,21 @@ export class FileStore implements Store {
     });
   }
 
+  /**
+   * Finds the person, or records a new one.
+   *
+   * Matched on phone *and* name, because a phone number identifies a household
+   * rather than a person: a mother and her son booking from the same number are
+   * two patients. Only the matched person's contact details are refreshed.
+   */
   private upsertPatientSync(doctorId: ID, input: BookSlotInput["patient"]): Patient {
     const now = new Date().toISOString();
     const phone = input.phone.trim();
-    const existing = this.db.patients.find((p) => p.phone === phone);
+    const fullName = input.fullName.trim();
+    const existing = this.db.patients.find(
+      (p) => p.phone === phone && p.full_name.toLowerCase() === fullName.toLowerCase(),
+    );
     if (existing) {
-      existing.full_name = input.fullName.trim();
       existing.email = input.email.trim().toLowerCase();
       existing.updated_at = now;
       existing.consent_at = now;
@@ -276,7 +285,7 @@ export class FileStore implements Store {
     const patient: Patient = {
       id: randomUUID(),
       doctor_id: doctorId,
-      full_name: input.fullName.trim(),
+      full_name: fullName,
       phone,
       email: input.email.trim().toLowerCase(),
       auth_user_id: null,
@@ -319,6 +328,9 @@ export class FileStore implements Store {
         doctor_id: input.doctorId,
         slot_id: slot.id,
         patient_id: patient.id,
+        patient_name: patient.full_name,
+        patient_phone: patient.phone,
+        patient_email: patient.email,
         mode: input.mode,
         status: "confirmed",
         reason: input.reason?.trim() || null,

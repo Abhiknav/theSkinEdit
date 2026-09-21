@@ -58,9 +58,9 @@ export async function deliver(
 ): Promise<DeliveryResult> {
   if (job.channel === "email") {
     const message = renderMessage(job.kind, appointment, doctor);
-    return sendEmail(appointment.patient.email, message.subject, message.html, message.text);
+    return sendEmail(appointment.patient_email, message.subject, message.html, message.text);
   }
-  return sendWhatsApp(appointment.patient.phone, renderWhatsApp(job.kind, appointment, doctor));
+  return sendWhatsApp(appointment.patient_phone, renderWhatsApp(job.kind, appointment, doctor));
 }
 
 const channelsFor = (): NotificationChannel[] =>

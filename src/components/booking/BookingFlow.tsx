@@ -12,6 +12,9 @@ import { formatDay, formatTime } from "@/lib/types";
 import { useAvailability } from "@/lib/useAvailability";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
+/** Roughly the fixed header, so the card is not tucked under it. */
+const HEADER_CLEARANCE = 92;
+const CONFIRMATION_ID = "booking-confirmed";
 
 export function BookingFlow() {
   const [mode, setMode] = useState<ConsultMode>("clinic");
@@ -39,15 +42,44 @@ export function BookingFlow() {
     setDateKey((days.find((d) => d.open > 0) ?? days[0]).dateKey);
   }, [days, dateKey]);
 
-  // Someone else took the slot under us — say so rather than failing at submit.
+  // The slot stopped being bookable under us — say which, rather than failing
+  // at submit. A slot can also simply age past the lead time while the form is
+  // open, which is not the same thing as someone else taking it.
   useEffect(() => {
     if (!slot || !data) return;
     const current = data.days.flatMap((d) => d.slots).find((c) => c.id === slot.id);
-    if (!current || !current.available) {
-      setSlot(null);
-      setLiveNotice("That time was taken a moment ago. Please pick another — the calendar is already up to date.");
-    }
+    if (current?.available) return;
+    setSlot(null);
+    setLiveNotice(
+      current?.state === "too_soon"
+        ? "That time is now too close to book online. Please pick a later one, or call the clinic."
+        : "That time was booked a moment ago. Please pick another — the calendar is already up to date.",
+    );
   }, [liveTick, data, slot]);
+
+  /**
+   * Confirming replaces the whole flow — day rail, time grid and form — with a
+   * single card. The document loses roughly a screen of height above the fold,
+   * so the browser keeps its scroll offset and the viewport lands on whatever
+   * section follows. Re-anchor on the booking section so the confirmation is
+   * what the patient is actually looking at.
+   */
+  useEffect(() => {
+    if (!confirmed) return;
+    const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Wait for the collapsed layout to paint, or the target offset is stale.
+    const frame = requestAnimationFrame(() => {
+      // The card itself, not the section: anchoring on the section would leave
+      // its heading and tabs filling a phone screen with the confirmation
+      // below the fold, which is the thing the patient needs to read.
+      const target =
+        document.getElementById(CONFIRMATION_ID) ?? document.getElementById("book");
+      if (!target) return;
+      const top = target.getBoundingClientRect().top + window.scrollY - HEADER_CLEARANCE;
+      window.scrollTo({ top: Math.max(0, top), behavior: smooth ? "smooth" : "auto" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [confirmed]);
 
   function chooseSlot(next: PublicSlot) {
     setSlot(next);
@@ -331,7 +363,8 @@ function Confirmation({ appointment }: { appointment: PublicAppointment }) {
       initial={{ opacity: 0, y: 26 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: EASE }}
-      className="mx-auto max-w-2xl"
+      id={CONFIRMATION_ID}
+      className="mx-auto max-w-2xl scroll-mt-28"
     >
       <div className="card px-7 py-12 text-center sm:px-14">
         <motion.div

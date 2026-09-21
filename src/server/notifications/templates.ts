@@ -66,7 +66,7 @@ export function renderMessage(
         subject: `Appointment confirmed — ${when.full}`,
         text: `Your appointment with Dr Akshi Bansal is confirmed for ${when.full}. Reference ${appointment.reference}. Manage it at ${manageUrl}`,
         html: shell(
-          `You are confirmed, ${appointment.patient.full_name.split(" ")[0]}.`,
+          `You are confirmed, ${appointment.patient_name.split(" ")[0]}.`,
           `<p style="font-size:15px;line-height:1.8;margin:0 0 20px">${where}</p>${detailBlock}
            <p style="margin:28px 0 0"><a href="${manageUrl}" style="display:inline-block;background:#121820;color:#ffffff;text-decoration:none;padding:13px 24px;font-size:13px;letter-spacing:0.14em;text-transform:uppercase">Manage booking</a></p>`,
           `Need to move it? Reschedule or cancel yourself up to 4 hours before, using reference <strong>${appointment.reference}</strong> and your phone number. Inside 4 hours, call +91 87929 82600.`,
@@ -121,7 +121,7 @@ export function renderWhatsApp(kind: NotificationKind, appointment: AppointmentD
   const when = formatSlot(appointment.slot.start_at, doctor.timezone);
   switch (kind) {
     case "confirmation":
-      return `The Skin Edit: Hi ${appointment.patient.full_name.split(" ")[0]}, your appointment with Dr Akshi Bansal is confirmed for ${when.full}. Ref ${appointment.reference}. Manage it at ${SITE_URL}/#manage`;
+      return `The Skin Edit: Hi ${appointment.patient_name.split(" ")[0]}, your appointment with Dr Akshi Bansal is confirmed for ${when.full}. Ref ${appointment.reference}. Manage it at ${SITE_URL}/#manage`;
     case "reminder_24h":
       return `The Skin Edit: Reminder — your appointment with Dr Akshi Bansal is ${when.full}. Ref ${appointment.reference}.`;
     case "reschedule":
