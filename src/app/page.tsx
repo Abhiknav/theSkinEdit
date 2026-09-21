@@ -15,8 +15,24 @@ import { listPublishedTestimonials } from "@/server/booking/service";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Approved patient notes are the only thing this page needs from the database,
+ * and they are the least important thing on it. A store that is unreachable or
+ * not yet migrated used to take the whole site down with a 500 — a clinic's
+ * front page should not depend on that. It renders without them instead, and
+ * the booking section reports its own trouble in place.
+ */
+async function testimonialsOrNone() {
+  try {
+    return await listPublishedTestimonials();
+  } catch (error) {
+    console.error("Could not load testimonials; rendering the page without them.", error);
+    return [];
+  }
+}
+
 export default async function HomePage() {
-  const testimonials = await listPublishedTestimonials();
+  const testimonials = await testimonialsOrNone();
 
   return (
     <>
