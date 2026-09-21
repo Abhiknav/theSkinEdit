@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 
 /**
  * Scroll-reveal system.
@@ -27,24 +27,53 @@ export type RevealKind =
 /**
  * True whenever the element is on screen — not just the first time.
  *
- * `armed` is only set from inside the observer callback, and the CSS keeps
- * content visible until then. So if IntersectionObserver never reports (an old
- * browser, a throttled background tab, JS that failed to run), the page reads as
- * plain un-animated content rather than going blank.
+ * Two details keep this from fighting itself. The reveal animations translate
+ * the element by up to 210px, which changes its own intersection with the root;
+ * a naive `isIntersecting` handler therefore un-reveals the element mid-flight,
+ * resets it and starts over, which reads as heavy flicker on a phone. So:
+ *
+ *  - Entering needs 12% of the element on screen, but leaving needs it fully
+ *    gone (ratio 0). That hysteresis absorbs the animation's own displacement.
+ *  - While a reveal is playing, "leave" is ignored outright.
+ *
+ * `armed` starts true so the server-rendered markup is already hidden. Without
+ * that the browser paints the content, then JS hides it to animate it in — a
+ * visible flash on first load. The <noscript> block in the layout restores
+ * everything when JS is off, and a missing IntersectionObserver disarms below.
  */
-function useInViewport(): [(node: HTMLElement | null) => void, boolean, boolean] {
+const HAS_IO = typeof IntersectionObserver !== "undefined";
+const ENTER_RATIO = 0.12;
+
+function useInViewport(holdMs = 0): [(node: HTMLElement | null) => void, boolean, boolean] {
   const [node, setNode] = useState<HTMLElement | null>(null);
-  const [state, setState] = useState({ armed: false, inView: false });
+  const [state, setState] = useState({ armed: true, inView: false });
+  const playingUntil = useRef(0);
 
   useEffect(() => {
+    if (!HAS_IO) {
+      setState({ armed: false, inView: false });
+      return;
+    }
     if (!node) return;
+
     const observer = new IntersectionObserver(
-      ([entry]) => setState({ armed: true, inView: entry.isIntersecting }),
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
+      ([entry]) => {
+        const now = performance.now();
+        setState((prev) => {
+          if (entry.intersectionRatio >= ENTER_RATIO) {
+            if (!prev.inView) playingUntil.current = now + holdMs;
+            return prev.inView ? prev : { armed: true, inView: true };
+          }
+          // Still partly on screen, or the reveal is mid-flight: hold the state.
+          if (entry.intersectionRatio > 0 || now < playingUntil.current) return prev;
+          return prev.inView ? { armed: true, inView: false } : prev;
+        });
+      },
+      { threshold: [0, ENTER_RATIO], rootMargin: "0px 0px -40px 0px" },
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [node]);
+  }, [node, holdMs]);
 
   return [setNode, state.inView, state.armed];
 }
@@ -69,9 +98,9 @@ export function Reveal({
   className?: string;
   as?: Tag;
 }) {
-  const [ref, inView, armed] = useInViewport();
-  const Element = as;
   const total = delay + (index ?? 0) * 0.11;
+  const [ref, inView, armed] = useInViewport((total + duration) * 1000 + 120);
+  const Element = as;
 
   return (
     <Element
@@ -103,12 +132,16 @@ export function SplitText({
   /** "mount" for above-the-fold copy, "view" for everything further down. */
   play?: "mount" | "view";
 }) {
-  const [ref, inView, armed] = useInViewport();
+  const [ref, inView, armed] = useInViewport(1400);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
+  // Both modes render armed on the server, so the browser paints the words
+  // already masked. Adding `in` afterwards is what the transition runs from —
+  // arming and revealing in the same commit gives the browser no start state,
+  // so the headline would jump into place instead of rising.
   const shown = play === "mount" ? mounted : inView;
-  const hide = play === "mount" ? mounted : armed;
+  const hide = play === "mount" ? true : armed;
   const words = text.split(" ");
 
   return (

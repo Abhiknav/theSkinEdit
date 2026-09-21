@@ -10,17 +10,26 @@ import { motion } from "framer-motion";
 export function Brand({
   size = "md",
   stacked = false,
+  compact = false,
   className = "",
 }: {
   size?: "sm" | "md";
   stacked?: boolean;
+  /**
+   * Header use. The wordmark is the widest thing in the header row, and below
+   * 380px it leaves no room for the booking button and the menu toggle side by
+   * side — so the monogram carries the brand on its own down there, and the
+   * name returns as soon as there is space for it.
+   */
+  compact?: boolean;
   className?: string;
 }) {
   const mono = size === "sm" ? "text-[1.85rem]" : "text-[2.4rem]";
   const word = size === "sm" ? "text-[0.72rem]" : "text-[0.82rem]";
+  const hideWord = compact ? "hidden min-[380px]:block" : "";
 
   return (
-    <span className={`inline-flex items-center gap-3 ${className}`}>
+    <span className={`inline-flex items-center gap-2 sm:gap-3 ${className}`}>
       <span
         className={`font-display ${mono} leading-[0.7] text-copper italic`}
         style={{ fontWeight: 400 }}
@@ -28,12 +37,18 @@ export function Brand({
       >
         se
       </span>
-      <span className="block h-7 w-px bg-border" aria-hidden />
-      <span className={stacked ? "flex flex-col leading-tight" : "flex items-baseline gap-2"}>
-        <span className={`${word} font-medium tracking-[0.22em] text-ink uppercase`}>
+      <span className={`h-7 w-px bg-border ${hideWord || "block"}`} aria-hidden />
+      <span
+        className={`${hideWord} ${stacked ? "flex-col leading-tight" : "items-baseline gap-2"} ${
+          hideWord ? "min-[380px]:flex" : "flex"
+        }`}
+      >
+        <span
+          className={`${word} font-medium tracking-[0.16em] whitespace-nowrap text-ink uppercase sm:tracking-[0.22em]`}
+        >
           The Skin Edit
         </span>
-        <span className="font-mono text-[0.58rem] tracking-[0.18em] text-faint uppercase">
+        <span className="font-mono text-[0.54rem] tracking-[0.14em] whitespace-nowrap text-faint uppercase sm:text-[0.58rem] sm:tracking-[0.18em]">
           Dr Akshi Bansal
         </span>
       </span>

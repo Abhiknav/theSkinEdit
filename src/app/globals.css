@@ -256,6 +256,73 @@
     mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
   }
 
+  /* ---------------------------------------------------------------------
+     Treatments wheel. A real scroll container rather than a click-only
+     carousel, so a finger or a trackpad moves it. Item height and the
+     container height are shared with Treatments.tsx via ITEM_H — the padding
+     below is what lets the first and last item reach the centre band.
+  --------------------------------------------------------------------- */
+  .wheel {
+    --wheel-h: 330px;
+    height: var(--wheel-h);
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-snap-type: y mandatory;
+    padding-block: calc((var(--wheel-h) - 62px) / 2);
+    perspective: 900px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .wheel::-webkit-scrollbar { width: 0; height: 0; display: none; }
+  @media (min-width: 640px) {
+    .wheel { --wheel-h: 390px; }
+  }
+
+  .wheel-item {
+    height: 62px;
+    scroll-snap-align: center;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+  }
+
+  /* Tags under a treatment, rising as the panel changes — the same tilt the
+     approach cards use, scaled down to chip size. */
+  .chip-rise {
+    animation: chip-rise 0.52s var(--ease-out-soft) backwards;
+    animation-delay: calc(var(--i, 0) * 70ms + 220ms);
+  }
+  @keyframes chip-rise {
+    from {
+      opacity: 0;
+      transform: perspective(600px) rotateX(24deg) translateY(18px);
+    }
+  }
+
+  /* Label, name and strapline arrive just ahead of the typing. */
+  .detail-in {
+    animation: detail-in 0.5s var(--ease-out-soft) backwards;
+    animation-delay: calc(var(--i, 0) * 60ms);
+  }
+  @keyframes detail-in {
+    from { opacity: 0; transform: translateY(12px); }
+  }
+
+  /* Typing caret for the treatment description. */
+  .caret {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 2px;
+    vertical-align: -0.14em;
+    background: var(--color-copper);
+    animation: caret-blink 0.9s steps(1, end) infinite;
+  }
+  @keyframes caret-blink {
+    0%, 45% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
   /* The soft arch used for the portrait — a beauty-brand shape, not a box. */
   .arch {
     border-radius: 220px 220px 26px 26px;
